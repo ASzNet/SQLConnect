@@ -2,7 +2,7 @@
 /*
 Licencia MIT
 
-Copyright 2019 	ASz<asznet66@gmail.com>
+Copyright 2019 	ASz <asznet66@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software 
 and associated documentation files (the "Software"), to deal in the Software without restriction, 
@@ -23,12 +23,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 /*
  * 
- * Conexion SQL Server,
- * Driver; sql_srv,
- * Autor:   ASz,
- * asznet66@gmail.com
+ * Conexion: SQL Server
+ * Driver: sql_srv
+ * Autor:   ASz <asznet66@gmail.com>
  * 
  */
+
+/*
+* No hay necesidad de abrir la conexion.
+* Cuando se crea la instancia del objeto, el construnctor lo hace    
+* Obligatorio hacer la llamada al metódo Cerrar() al finalizar..   
+*/
+
+
+
+
 class SQLConnect{
     
 //Valores default;
@@ -45,6 +54,7 @@ private $Conexion=null;
 
 //inicia las variables
 function __construct($HOST,$PORT,$USERDB,$PASSWORD,$DATABASE,$DEBUG=false) {
+
     $this->CONFIG["HOST"] = $HOST;
     $this->CONFIG["PORT"]=$PORT;
     $this->CONFIG["USERDB"]=$USERDB;
@@ -52,8 +62,9 @@ function __construct($HOST,$PORT,$USERDB,$PASSWORD,$DATABASE,$DEBUG=false) {
     $this->CONFIG["DATABASE"]=$DATABASE;
     $this->CONFIG["DEBUG"]=$DEBUG;
     
-  $this->Conexion = $this->Open();
+    $this->Conexion = $this->Open();
 }
+
 //Muestra los Query ejectados en Modo Debug
 private function PrintMsg($salida=""){
 $out="<div style='background: #eee; color:#000; with:100%; height: 30px; font-size: 12px;'>";
@@ -67,55 +78,54 @@ print($out);
 //Abre la conexion y se asigna a la variable
 private function Open(){
 
-$conndb = array( "Database"=>$this->CONFIG["DATABASE"], "UID"=>$this->CONFIG["USERDB"], "PWD"=>$this->CONFIG["PASSWORD"]);
+ $conndb = array( "Database"=>$this->CONFIG["DATABASE"], "UID"=>$this->CONFIG["USERDB"], "PWD"=>$this->CONFIG["PASSWORD"]);
  $conn = sqlsrv_connect($this->CONFIG["HOST"],$conndb);
-if($conn ) {
-    if ($this->CONFIG["DEBUG"] == true) {
-                    $this->PrintMsg("Conexión establecida.");
-                }
-            }else{
-                if ($this->CONFIG["DEBUG"] == true) {
-                    $this->PrintMsg("La Conexión no se pudo establecer.");
-                }
-                die( print_r(sqlsrv_errors($this->Conexion), true));
-}
+
+    if($conn ) {
+                    if ($this->CONFIG["DEBUG"] == true) {
+                        $this->PrintMsg("Conexión establecida.");
+                    }
+    }else{
+                    if ($this->CONFIG["DEBUG"] == true) {
+                        $this->PrintMsg("La Conexión no se pudo establecer.");
+                    }
+                    die( print_r(sqlsrv_errors($this->Conexion), true));
+    }
     return $conn;
 }
 
  // Inicia una transaccion
 function Begin(){
 
-if (sqlsrv_begin_transaction($this->Conexion) === false) 
-{
-     die( print_r(sqlsrv_errors($this->Conexion), true ));
-}
+    if (sqlsrv_begin_transaction($this->Conexion) === false) 
+    {
+        die( print_r(sqlsrv_errors($this->Conexion), true ));
+    }
     
 }
 
  //Finaliza la Transaccion
 function Commit()
 {
-if(sqlsrv_commit($this->Conexion) === false)
-{
-     if(sqlsrv_rollback($this->Conexion)==false){
-         die( print_r(sqlsrv_errors($this->Conexion), true ));
-     }
-}
+    if(sqlsrv_commit($this->Conexion) === false)
+    {
+        if(sqlsrv_rollback($this->Conexion)==false){
+            die( print_r(sqlsrv_errors($this->Conexion), true ));
+        }
+    }
 }
 
 //DESCONECTA DE LA BASE
 function Close(){
    $close = sqlsrv_close($this->Conexion);
-    if($close) {
-     //echo "Conexión Cerrada.<br />";
+if($close) {
 }else{
     if ($this->CONFIG["DEBUG"] == true) {
-                    $this->PrintMsg("La Conexión no se pudo Cerrar.");
-                }
-                die( print_r( sqlsrv_errors($this->Conexion), true));
+         $this->PrintMsg("La Conexión no se pudo Cerrar.");
+     }
+    die( print_r( sqlsrv_errors($this->Conexion), true));
 }
 }
-
 
 // Ejecuta un query que no devuelve datos;
 function ExecSql($query,$resultsert=false){
@@ -165,6 +175,7 @@ if($result === false ) {
 sqlsrv_free_stmt($result);
 if(isset($datos)){ return $datos; }
 else{ return "-1"; }
+
 }
 
 //Cancela una transaccion
@@ -251,4 +262,6 @@ function Error(){
 
 
 }
+
+
 ?> 
